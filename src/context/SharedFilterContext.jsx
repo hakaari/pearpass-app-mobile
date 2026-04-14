@@ -27,8 +27,8 @@ export const SharedFilterProvider = ({ children }) => {
 
 /**
  * @returns {{
- *   folder: string,
- *   isFavorite: boolean
+ *   state: { folder: string, isFavorite: boolean, sort: string },
+ *   setState: Function
  * }}
  */
 export const useSharedFilter = () => useContext(SharedFilterContext)

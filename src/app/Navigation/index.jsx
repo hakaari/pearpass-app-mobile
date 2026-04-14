@@ -7,6 +7,7 @@ import {
 } from '../../screens/AuthV2'
 import { CreateFolder } from '../../screens/CreateFolder'
 import { CreateRecord } from '../../screens/CreateRecord'
+import { CreatePasswordItemV2 } from '../../screens/CreateRecord/v2/CreatePasswordItemV2'
 import { ErrorScreen } from '../../screens/ErrorScreen'
 import { ImagePreview } from '../../screens/ImagePreview'
 import { ImagePreviewV2 } from '../../screens/ImagePreview/ImagePreviewV2'
@@ -103,6 +104,7 @@ export const Navigation = ({ initialRouteName }) => (
       name="ImagePreview"
       component={isV2() ? ImagePreviewV2 : ImagePreview}
     />
+    <Stack.Screen name="CreatePasswordItem" component={CreatePasswordItemV2} />
     <Stack.Screen name="CreateRecord" component={CreateRecord} />
     <Stack.Screen name="CreateFolder" component={CreateFolder} />
     <Stack.Screen name="MasterPassword" component={MasterPassword} />
