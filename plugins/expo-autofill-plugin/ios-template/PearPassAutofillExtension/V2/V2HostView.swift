@@ -746,11 +746,13 @@ struct V2HostView: View {
         return matching.isEmpty ? credentials : matching
     }
 
+    /// All paths funnel through extractDomain so the target side is normalized
+    /// the same way as the record-website side (lowercase, no scheme/path/port,
+    /// no leading www.) — without this an rpId like "www.example.com" wouldn't
+    /// match a record website saved at "https://example.com/login".
     private var targetDomain: String? {
-        if let ctx = registrationContext { return ctx.rpId }
-        // Passkey assertion: rpId is authoritative.
-        if let rpId = passkeyRpId, !rpId.isEmpty { return rpId }
-        // Password assertion: pull domain from first ASCredentialServiceIdentifier.
+        if let ctx = registrationContext { return extractDomain(from: ctx.rpId) }
+        if let rpId = passkeyRpId, !rpId.isEmpty { return extractDomain(from: rpId) }
         if let first = serviceIdentifiers.first {
             return extractDomain(from: first.identifier)
         }
