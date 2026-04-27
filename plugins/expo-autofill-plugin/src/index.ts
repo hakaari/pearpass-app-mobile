@@ -3,6 +3,7 @@ import { withIosAutofillExtension } from './ios/withIosAutofillExtension';
 import { withIosPodfile } from './ios/withIosPodfile';
 import { withIosAutofillModule } from './ios/withIosAutofillModule';
 import { withIosDesignVersion } from './ios/withIosDesignVersion';
+import { withIosExtensionExceptions } from './ios/withIosExtensionExceptions';
 import { withAndroidAutofillService } from './android/withAndroidAutofillService';
 import { withAndroidManifest } from './android/withAndroidManifest';
 import { withAndroidAutofillModule } from './android/withAndroidAutofillModule';
@@ -22,6 +23,7 @@ const withAutofillPlugin: ConfigPlugin<AutofillPluginOptions> = (config, options
     [withIosPodfile, options],
     [withIosAutofillModule, options],
     [withIosDesignVersion, options],
+    [withIosExtensionExceptions, options],
     // Android
     [withAndroidAutofillService, options],
     [withAndroidManifest, options],
