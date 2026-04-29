@@ -114,7 +114,7 @@ export const ImportScanStep = ({
       )}
 
       <InputField
-        label={t`Item / Vault Link`}
+        label={t`Vault Link`}
         value={inviteCode}
         onChangeText={setInviteCode}
         placeholderText={t`Enter Share Link`}
