@@ -37,6 +37,7 @@ export const ImportVault = () => {
 
   const handleCodeScanned = useCallback(
     async (code: string) => {
+      setInviteCode(code)
       const vault = await pairWithCode(code)
       if (vault) {
         setStep('preview')
