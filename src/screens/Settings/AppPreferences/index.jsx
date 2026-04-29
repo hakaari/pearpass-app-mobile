@@ -29,6 +29,7 @@ import * as SecureStore from 'expo-secure-store'
 import { AppState, Platform, Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { IOS_APP_GROUP_ID } from '../../../constants/iosAppGroup'
 import { SECURE_STORAGE_KEYS } from '../../../constants/secureStorageKeys'
 import { OptionsSheet } from '../../../containers/BottomSheet/OptionsSheet'
 import { Layout } from '../../../containers/Layout'
@@ -65,6 +66,7 @@ export const AppPreferences = () => {
   const [isNonSecureAllowed, setIsNonSecureAllowed] = useState(false)
   const [isPinEnabled, setIsPinEnabled] = useState(false)
   const [isRemindersEnabled, setIsRemindersEnabled] = useState(true)
+  const [isCopyToClipboardEnabled, setIsCopyToClipboardEnabled] = useState(true)
   const appStateRef = useRef(AppState.currentState)
 
   const clipboardTimeoutOptions = useMemo(
@@ -98,10 +100,13 @@ export const AppPreferences = () => {
 
   useEffect(() => {
     const loadSettings = async () => {
-      const [clipTimeout, nonSecure, pin] = await Promise.all([
+      const [clipTimeout, nonSecure, pin, copyToClipboard] = await Promise.all([
         SecureStore.getItemAsync(SECURE_STORAGE_KEYS.CLIPBOARD_CLEAR_TIMEOUT),
         SecureStore.getItemAsync(SECURE_STORAGE_KEYS.ALLOW_NON_SECURE_WEBSITES),
-        SecureStore.getItemAsync(SECURE_STORAGE_KEYS.PIN_ENABLED)
+        SecureStore.getItemAsync(SECURE_STORAGE_KEYS.PIN_ENABLED),
+        SecureStore.getItemAsync(SECURE_STORAGE_KEYS.COPY_TO_CLIPBOARD, {
+          accessGroup: IOS_APP_GROUP_ID
+        })
       ])
 
       if (clipTimeout === 'null') {
@@ -112,6 +117,7 @@ export const AppPreferences = () => {
       setIsNonSecureAllowed(nonSecure === 'true')
       setIsPinEnabled(pin === 'true')
       setIsRemindersEnabled(isPasswordChangeReminderEnabled)
+      setIsCopyToClipboardEnabled(copyToClipboard !== 'false')
     }
 
     refreshAutofillStatus()
@@ -174,6 +180,19 @@ export const AppPreferences = () => {
       checked,
       true
     )
+  }, [])
+
+  const handleCopyToClipboardToggle = useCallback(async (checked) => {
+    setIsCopyToClipboardEnabled(checked)
+    if (checked) {
+      await SecureStore.deleteItemAsync(SECURE_STORAGE_KEYS.COPY_TO_CLIPBOARD)
+    } else {
+      await SecureStore.setItemAsync(
+        SECURE_STORAGE_KEYS.COPY_TO_CLIPBOARD,
+        'false',
+        { accessGroup: IOS_APP_GROUP_ID }
+      )
+    }
   }, [])
 
   const handleClipboardTimeoutSelect = useCallback(
@@ -436,6 +455,14 @@ export const AppPreferences = () => {
                 />
               </Pressable>
             </View>
+          </View>
+          <View style={cardRowStyle(false)}>
+            <ToggleSwitch
+              checked={isCopyToClipboardEnabled}
+              onChange={handleCopyToClipboardToggle}
+              label={t`Copy to Clipboard`}
+              description={t`Enable one-tap copying to move your credentials between apps effortlessly.`}
+            />
           </View>
           <View style={cardRowStyle(true)}>
             <ToggleSwitch
