@@ -159,12 +159,45 @@ describe('useVaultSwitch', () => {
     expect(refetchVault).toHaveBeenCalledWith('vault-other', { password: 'pw' })
   })
 
-  it('subscribes loading flag to useGlobalLoading', () => {
-    renderHook(() => useVaultSwitch())
+  it('passes loading state through useGlobalLoading across protected vault switch and modal submit', async () => {
+    useGlobalLoading.mockImplementation(() => {})
 
-    expect(useGlobalLoading).toHaveBeenCalled()
+    isVaultProtected.mockResolvedValue(true)
+    const onSwitchComplete = jest.fn()
+
+    const { result } = renderHook(() => useVaultSwitch({ onSwitchComplete }))
+
     expect(useGlobalLoading.mock.calls[0][0]).toEqual(
       expect.objectContaining({ isLoading: false })
     )
+    const callsAfterMount = useGlobalLoading.mock.calls.length
+
+    await act(async () => {
+      await result.current.switchVault(vaultOther)
+    })
+
+    expect(useGlobalLoading.mock.calls.length).toBeGreaterThan(callsAfterMount)
+    expect(
+      useGlobalLoading.mock.calls[useGlobalLoading.mock.calls.length - 1][0]
+    ).toEqual(expect.objectContaining({ isLoading: false }))
+
+    const modalElement = openModal.mock.calls[0][0]
+
+    const callsAfterModalOpen = useGlobalLoading.mock.calls.length
+
+    await act(async () => {
+      await modalElement.props.onSubmit('correct-horse')
+    })
+
+    expect(onSwitchComplete).toHaveBeenCalledTimes(1)
+    expect(useGlobalLoading.mock.calls.length).toBeGreaterThan(
+      callsAfterModalOpen
+    )
+    expect(
+      useGlobalLoading.mock.calls[useGlobalLoading.mock.calls.length - 1][0]
+    ).toEqual(expect.objectContaining({ isLoading: false }))
+    // React 18 may batch consecutive setIsLoading updates inside one async continuation,
+    // so discrete true renders are not always observable in Jest; we still assert extra
+    // subscriptions after switch + submit and terminal idle state above.
   })
 })

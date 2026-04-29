@@ -25,7 +25,7 @@ export const VaultRow = ({
   return (
     <View>
       <ListItem
-        onClick={() => onClick?.()}
+        onClick={onClick}
         platform="mobile"
         icon={
           <View style={styles.iconBadge}>
@@ -39,19 +39,17 @@ export const VaultRow = ({
         title={vault?.name ?? vault?.id}
         subtitle={t`Private`}
         rightElement={
-          <View style={styles.actions}>
-            {isCurrentVault && (
+          isCurrentVault && (
+            <View style={styles.actions}>
               <Button
                 variant="tertiary"
                 size="small"
                 iconBefore={<PersonAdd color={theme.colors.colorTextPrimary} />}
                 onClick={onAddMember}
               />
-            )}
-            {isCurrentVault ? (
               <VaultActionsMenu {...vaultActions} />
-            ) : undefined}
-          </View>
+            </View>
+          )
         }
       />
 

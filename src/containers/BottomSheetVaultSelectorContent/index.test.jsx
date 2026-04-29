@@ -19,6 +19,13 @@ const mockOnCreateVault = jest.fn()
 const mockOnNavigate = jest.fn()
 const mockIsModifyVaultModalV2Enabled = jest.fn(() => false)
 
+jest.mock('@gorhom/bottom-sheet', () => ({
+  useBottomSheetModal: () => ({
+    dismiss: jest.fn(),
+    dismissAll: jest.fn()
+  })
+}))
+
 jest.mock('../../hooks/useVaultSwitch', () => ({
   useVaultSwitch: () => ({ switchVault: mockSwitchVault })
 }))
@@ -44,7 +51,8 @@ jest.mock('@tetherto/pearpass-lib-ui-kit/icons', () => {
   return {
     Add: () => <RN.View testID="icon-add" />,
     LockFilled: () => <RN.View testID="icon-lock" />,
-    MoreVert: () => <RN.View testID="icon-more" />
+    MoreVert: () => <RN.View testID="icon-more" />,
+    PersonAdd: () => <RN.View testID="icon-person-add" />
   }
 })
 
@@ -74,6 +82,9 @@ jest.mock('@tetherto/pearpass-lib-ui-kit', () => {
         <RN.Text testID={`selected-flag-${String(title)}`}>
           {String(!!selected)}
         </RN.Text>
+        <RN.Text testID={`list-item-row-onpress-${String(title)}`}>
+          {onClick ? 'wired' : 'omitted'}
+        </RN.Text>
         <RN.TouchableOpacity
           testID={`list-item-press-${String(title)}`}
           onPress={onClick}
@@ -82,6 +93,7 @@ jest.mock('@tetherto/pearpass-lib-ui-kit', () => {
       </RN.View>
     ),
     rawTokens: {
+      spacing4: 4,
       spacing16: 16
     },
     useBottomSheetClose: () => mockCollapse,
@@ -192,15 +204,25 @@ describe('BottomSheetVaultSelectorContent', () => {
     )
   })
 
-  it('calls switchVault when a vault row is pressed', () => {
+  it('omits row onClick for the active vault only; other vault row switches and calls switchVault', () => {
     const { getByTestId } = renderSheet()
 
-    fireEvent.press(getByTestId('list-item-press-Other Vault'))
+    expect(
+      getByTestId('list-item-row-onpress-Active Vault').props.children
+    ).toBe('omitted')
+    expect(
+      getByTestId('list-item-row-onpress-Other Vault').props.children
+    ).toBe('wired')
 
+    fireEvent.press(getByTestId('list-item-press-Active Vault'))
+    expect(mockSwitchVault).not.toHaveBeenCalled()
+
+    fireEvent.press(getByTestId('list-item-press-Other Vault'))
+    expect(mockSwitchVault).toHaveBeenCalledTimes(1)
     expect(mockSwitchVault).toHaveBeenCalledWith(vaults[1])
   })
 
-  it('shows overflow actions for the active vault and opens the actions panel', () => {
+  it('opens BottomSheetVaultAction when overflow is pressed on the active vault', () => {
     const { getByTestId, queryByTestId } = renderSheet()
 
     expect(getByTestId('vault-overflow-btn')).toBeTruthy()
@@ -213,7 +235,7 @@ describe('BottomSheetVaultSelectorContent', () => {
     )
   })
 
-  it('returns from actions panel to the vault list when back is pressed', () => {
+  it('returns from vault actions to the list when back is pressed', () => {
     const { getByTestId, queryByTestId } = renderSheet()
 
     fireEvent.press(getByTestId('vault-overflow-btn'))
@@ -225,7 +247,7 @@ describe('BottomSheetVaultSelectorContent', () => {
     expect(getByTestId('sheet-header-title')).toBeTruthy()
   })
 
-  it('closes via actions panel onClose using collapse and onRequestClose', () => {
+  it('closes via vault actions onClose using collapse and onRequestClose', () => {
     const { getByTestId } = renderSheet()
 
     fireEvent.press(getByTestId('vault-overflow-btn'))

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { useBottomSheetModal } from '@gorhom/bottom-sheet'
 import { useLingui } from '@lingui/react/macro'
 import {
   Button,
@@ -7,8 +8,14 @@ import {
   useBottomSheetClose,
   useTheme
 } from '@tetherto/pearpass-lib-ui-kit'
-import { Add, LockFilled, MoreVert } from '@tetherto/pearpass-lib-ui-kit/icons'
+import {
+  Add,
+  LockFilled,
+  MoreVert,
+  PersonAdd
+} from '@tetherto/pearpass-lib-ui-kit/icons'
 import { useVault, useVaults } from '@tetherto/pearpass-lib-vault'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { VAULT_ACTION } from 'src/constants/vaultActions'
 
@@ -32,7 +39,7 @@ export const BottomSheetVaultSelectorContent = ({
   const collapse = useBottomSheetClose()
   const { bottom } = useSafeAreaInsets()
   const { openModal, closeModal } = useModal()
-
+  const { dismiss } = useBottomSheetModal()
   const [menuVault, setMenuVault] = useState(null)
 
   const { data: vaultsData } = useVaults()
@@ -56,6 +63,13 @@ export const BottomSheetVaultSelectorContent = ({
         action={action}
       />
     )
+  }
+
+  const onNavigateToShareVault = (vault) => {
+    onNavigate?.('ShareVault', {
+      vaultId: vault.id,
+      vaultName: vault.name
+    })
   }
 
   const buildVaultActions = (vault) => ({
@@ -82,16 +96,10 @@ export const BottomSheetVaultSelectorContent = ({
       })
     },
     onMembers: () => {
-      onNavigate?.('ShareVault', {
-        vaultId: vault.id,
-        vaultName: vault.name
-      })
+      onNavigateToShareVault(vault)
     },
     onShare: () => {
-      onNavigate?.('ShareVault', {
-        vaultId: vault.id,
-        vaultName: vault.name
-      })
+      onNavigateToShareVault(vault)
     },
     onDelete: () => {
       onNavigate?.('VaultDeleteScreen', {
@@ -114,6 +122,11 @@ export const BottomSheetVaultSelectorContent = ({
     )
   }
 
+  const closeAndRun = (action) => {
+    dismiss()
+    action?.()
+  }
+
   return (
     <Layout
       mode="sheet"
@@ -134,18 +147,30 @@ export const BottomSheetVaultSelectorContent = ({
             style={styles.listItem}
             rightElement={
               isSelected ? (
-                <Button
-                  variant="tertiary"
-                  size="small"
-                  iconBefore={
-                    <MoreVert color={theme.colors.colorTextPrimary} />
-                  }
-                  aria-label={t`Vault actions`}
-                  onClick={() => setMenuVault(vault)}
-                />
+                <View style={styles.rowActions}>
+                  <Button
+                    variant="tertiary"
+                    size="small"
+                    iconBefore={
+                      <PersonAdd color={theme.colors.colorTextPrimary} />
+                    }
+                    onClick={() =>
+                      closeAndRun(() => onNavigateToShareVault(vault))
+                    }
+                  />
+                  <Button
+                    variant="tertiary"
+                    size="small"
+                    iconBefore={
+                      <MoreVert color={theme.colors.colorTextPrimary} />
+                    }
+                    aria-label={t`Vault actions`}
+                    onClick={() => setMenuVault(vault)}
+                  />
+                </View>
               ) : undefined
             }
-            onClick={() => switchVault(vault)}
+            onClick={isSelected ? undefined : () => switchVault(vault)}
           />
         )
       })}
