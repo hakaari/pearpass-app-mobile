@@ -280,6 +280,11 @@ export const CreateOrEditLoginContent = ({
       return
     }
 
+    if (folder.name === 'allFolder') {
+      setValue('folder', '')
+      return
+    }
+
     setValue('folder', folder.name === values.folder ? '' : (folder.name ?? ''))
   }
 
@@ -469,8 +474,6 @@ export const CreateOrEditLoginContent = ({
             <BottomSheetFolderSelectorContent
               selectedFolder={values.folder}
               onSelect={handleFolderSelect}
-              includeAllFolders={false}
-              includeNoFolder
             />
           </ContextMenu>
         </MultiSlotInput>

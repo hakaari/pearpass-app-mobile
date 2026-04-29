@@ -12,7 +12,6 @@ import {
   CreateNewFolder,
   Folder,
   FolderCopy,
-  FolderOpen,
   MoreVert
 } from '@tetherto/pearpass-lib-ui-kit/icons'
 import { useFolders, useRecordCountsByType } from '@tetherto/pearpass-lib-vault'
@@ -26,8 +25,7 @@ import { Layout } from '../Layout'
 export const BottomSheetFolderSelectorContent = ({
   selectedFolder,
   onSelect,
-  includeAllFolders = true,
-  includeNoFolder = false
+  includeAllFolders = true
 }) => {
   const { t } = useLingui()
   const navigation = useNavigation()
@@ -130,18 +128,6 @@ export const BottomSheetFolderSelectorContent = ({
           platform="mobile"
           showDivider
           onClick={() => handleSelect('allFolder')}
-        />
-      )}
-
-      {includeNoFolder && (
-        <NavbarListItem
-          icon={<FolderOpen color={theme.colors.colorTextPrimary} />}
-          iconSize={16}
-          label={t`No Folder`}
-          selected={!activeFolder}
-          platform="mobile"
-          showDivider
-          onClick={() => handleSelect('')}
         />
       )}
 
