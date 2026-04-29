@@ -18,10 +18,7 @@ export const ImportPreviewStep = ({ error }: ImportPreviewStepProps) => {
     shouldSkip: false,
     variables: {
       filters: {
-        searchPattern: '',
-        type: '',
-        folder: '',
-        isFavorite: false
+        searchPattern: ''
       },
       sort: { key: 'updatedAt', direction: 'desc' }
     }
